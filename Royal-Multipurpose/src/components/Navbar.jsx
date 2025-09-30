@@ -15,11 +15,12 @@ const Navbar = ({ onSelectCategory, onSearch }) => {
   const [noResults, setNoResults] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
   const [showSearchResults, setShowSearchResults] = useState(false);
+
   useEffect(() => {
     fetchData();
   }, []);
 
-  const fetchData = async (value) => {
+  const fetchData = async () => {
     try {
       const response = await axios.get("http://localhost:8080/api/products");
       setSearchResults(response.data);
@@ -50,38 +51,11 @@ const Navbar = ({ onSelectCategory, onSearch }) => {
     }
   };
 
-  // const handleChange = async (value) => {
-  //   setInput(value);
-  //   if (value.length >= 1) {
-  //     setShowSearchResults(true);
-  //     try {
-  //       let response;
-  //       if (!isNaN(value)) {
-  //         // Input is a number, search by ID
-  //         response = await axios.get(`http://localhost:8080/api/products/search?id=${value}`);
-  //       } else {
-  //         // Input is not a number, search by keyword
-  //         response = await axios.get(`http://localhost:8080/api/products/search?keyword=${value}`);
-  //       }
-
-  //       const results = response.data;
-  //       setSearchResults(results);
-  //       setNoResults(results.length === 0);
-  //       console.log(results);
-  //     } catch (error) {
-  //       console.error("Error searching:", error.response ? error.response.data : error.message);
-  //     }
-  //   } else {
-  //     setShowSearchResults(false);
-  //     setSearchResults([]);
-  //     setNoResults(false);
-  //   }
-  // };
-
   const handleCategorySelect = (category) => {
     setSelectedCategory(category);
     onSelectCategory(category);
   };
+
   const toggleTheme = () => {
     const newTheme = theme === "dark-theme" ? "light-theme" : "dark-theme";
     setTheme(newTheme);
@@ -92,15 +66,30 @@ const Navbar = ({ onSelectCategory, onSearch }) => {
     document.body.className = theme;
   }, [theme]);
 
-  const categories = [
-    "Laptop",
-    "Headphone",
-    "Mobile",
-    "Electronics",
-    "Toys",
-    "Cars",
-    "Fashion",
-  ];
+  // Nested categories
+  const categories = {
+    Electronics: [
+      "Mobiles & Tablets",
+      "Laptops & Computers",
+      "Headphones & Audio",
+      "Wearables & Smart Devices",
+    ],
+    Fashion: ["Men", "Women"],
+    "Toys & Games": [
+      "Action Figures",
+      "Board Games & Puzzles",
+      "Outdoor Play",
+      "Educational Toys",
+    ],
+    "Food & Grocery": [
+      "Fruits & Vegetables",
+      "Snacks & Packaged Food",
+      "Beverages",
+      "Dairy & Bakery",
+      "Household Essentials",
+    ],
+  };
+
   return (
     <>
       <header>
@@ -123,6 +112,7 @@ const Navbar = ({ onSelectCategory, onSearch }) => {
             >
               <span className="navbar-toggler-icon"></span>
             </button>
+
             <div
               className="collapse navbar-collapse"
               id="navbarSupportedContent"
@@ -139,6 +129,7 @@ const Navbar = ({ onSelectCategory, onSearch }) => {
                   </a>
                 </li>
 
+                {/* Categories Dropdown */}
                 <li className="nav-item dropdown">
                   <a
                     className="nav-link dropdown-toggle"
@@ -149,30 +140,43 @@ const Navbar = ({ onSelectCategory, onSearch }) => {
                   >
                     Categories
                   </a>
-
                   <ul className="dropdown-menu">
-                    {categories.map((category) => (
-                      <li key={category}>
+                    {Object.keys(categories).map((mainCategory) => (
+                      <li key={mainCategory} className="dropdown-submenu">
                         <button
-                          className="dropdown-item"
-                          onClick={() => handleCategorySelect(category)}
+                          className="dropdown-item dropdown-toggle"
+                          onClick={() => handleCategorySelect(mainCategory)}
                         >
-                          {category}
+                          {mainCategory}
                         </button>
+                        <ul className="dropdown-menu">
+                          {categories[mainCategory].map((subCategory) => (
+                            <li key={subCategory}>
+                              <button
+                                className="dropdown-item"
+                                onClick={() => handleCategorySelect(subCategory)}
+                              >
+                                {subCategory}
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
                       </li>
                     ))}
                   </ul>
                 </li>
-
-                <li className="nav-item"></li>
               </ul>
-              <button className="theme-btn" onClick={() => toggleTheme()}>
+
+              {/* Theme Toggle */}
+              <button className="theme-btn" onClick={toggleTheme}>
                 {theme === "dark-theme" ? (
                   <i className="bi bi-moon-fill"></i>
                 ) : (
                   <i className="bi bi-sun-fill"></i>
                 )}
               </button>
+
+              {/* Search + Cart */}
               <div className="d-flex align-items-center cart">
                 <a href="/cart" className="nav-link text-dark">
                   <i
@@ -182,7 +186,7 @@ const Navbar = ({ onSelectCategory, onSearch }) => {
                     Cart
                   </i>
                 </a>
-                {/* <form className="d-flex" role="search" onSubmit={handleSearch} id="searchForm"> */}
+
                 <input
                   className="form-control me-2"
                   type="search"
@@ -190,37 +194,32 @@ const Navbar = ({ onSelectCategory, onSearch }) => {
                   aria-label="Search"
                   value={input}
                   onChange={(e) => handleChange(e.target.value)}
-                  onFocus={() => setSearchFocused(true)} // Set searchFocused to true when search bar is focused
-                  onBlur={() => setSearchFocused(false)} // Set searchFocused to false when search bar loses focus
+                  onFocus={() => setSearchFocused(true)}
+                  onBlur={() => setSearchFocused(false)}
                 />
+
                 {showSearchResults && (
                   <ul className="list-group">
-                    {searchResults.length > 0
-                      ? searchResults.map((result) => (
-                          <li key={result.id} className="list-group-item">
-                            <a
-                              href={`/product/${result.id}`}
-                              className="search-result-link"
-                            >
-                              <span>{result.name}</span>
-                            </a>
-                          </li>
-                        ))
-                      : noResults && (
-                          <p className="no-results-message">
-                            No Prouduct with such Name
-                          </p>
-                        )}
+                    {searchResults.length > 0 ? (
+                      searchResults.map((result) => (
+                        <li key={result.id} className="list-group-item">
+                          <a
+                            href={`/product/${result.id}`}
+                            className="search-result-link"
+                          >
+                            <span>{result.name}</span>
+                          </a>
+                        </li>
+                      ))
+                    ) : (
+                      noResults && (
+                        <p className="no-results-message">
+                          No Product with such Name
+                        </p>
+                      )
+                    )}
                   </ul>
                 )}
-                {/* <button
-                  className="btn btn-outline-success"
-                  onClick={handleSearch}
-                >
-                  Search Products
-                </button> */}
-                {/* </form> */}
-                <div />
               </div>
             </div>
           </div>

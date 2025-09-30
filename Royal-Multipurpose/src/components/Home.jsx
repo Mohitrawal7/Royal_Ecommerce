@@ -147,15 +147,22 @@ const Home = ({ selectedCategory }) => {
                       </i>
                     </div>
                     <hr className="hr-line" style={{ margin: "10px 0" }} />
-                    <div className="home-cart-price">
-                      <h5
-                        className="card-text"
-                        style={{ fontWeight: "600", fontSize: "1.1rem",marginBottom:'5px' }}
-                      >
-                        <i class="bi bi-currency-rupee"></i>
-                        {price}
-                      </h5>
-                    </div>
+                   <div className="flex items-center justify-between w-full">
+                 <h5 className="font-semibold text-lg flex items-center">
+                      <i className="bi bi-currency-rupee mr-1"></i>
+                      {price}
+                 </h5>
+
+                 <div className="flex text-yellow-400">
+                  <i className="bi bi-star-fill"></i>
+                  <i className="bi bi-star-fill"></i>
+                 <i className="bi bi-star-fill"></i>
+                 <i className="bi bi-star-fill"></i>
+                 <i className="bi bi-star-half"></i>
+               </div>
+                  </div>
+
+
                     <button
                       className="btn-hover color-9"
                       style={{margin:'10px 25px 0px '  }}
